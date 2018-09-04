@@ -1,12 +1,13 @@
 """ File to store and revoke preferences """
+from my_preferences import *
 
-name = "Roza"
-work_time_unit = 25
-short_break_time = 5
-long_break_time = 15
+
+def list_current_preferences():
+    """ Lists all current preferences """
+    pass
 
 def get_user_name():
-    """ Reurns current user name """
+    """ Returns current user name """
     return name
 
 def get_work_time_unit():

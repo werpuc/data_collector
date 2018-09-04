@@ -15,7 +15,10 @@ def gather_general_data(day):
     actual_day_start = input("When did you actually get out of bed? ")
     if_slept_well = input("Have you slept well? ")
     if_morning_routine = input("Have you done you morning workout routine? ")
-    print(str(day), input_validator(if_slept_well))
+    f = open("my_daily_data.csv", "a+")
+    f.write( str(day) + ',' + actual_day_start + ',' + str(input_validator(if_slept_well)) + ',' + str(input_validator(if_morning_routine)) + '\n')
+    f.close()
+    # print(str(day), actual_day_start, input_validator(if_slept_well), input_validator(if_morning_routine))
 
 
 def input_validator(answer):
@@ -25,25 +28,27 @@ def input_validator(answer):
     elif answer == 'y':
         answer = True
     else:
-        print("Please, be kind to me and answer as requested")
+        print("I don't understand. Let's call it 'no' ")
+        return 0
     return int(answer)
 
 
-def working_body(consent, work_time, short_break_time, long_break_time):
+def working_body(work_time, short_break_time, long_break_time):
     no_session = 0
-    if consent:
-        no_session = no_session + 1
-        print("Start working session no. " + str(no_session))
-        # todo: countdown
-        if no_session % 4 == 0:
-            print("Time for long break")
-            break_time = long_break_time
-        else:
-            print("Time for short break")
-        # todo: the same for break
+    # todo: while
+    no_session = no_session + 1
+    print("Start working session no. " + str(no_session))
+    # todo: countdown
+    if no_session % 4 == 0:
+        print("Time for long break")
+        break_time = long_break_time
+    else:
+        print("Time for short break")
+        break_time = short_break_time
+
+    # todo: the same for break
     return no_session
 
-    # todo: while
     # todo : summary after everything
 
 
@@ -60,9 +65,11 @@ def main():
 
     consent = input("Are you ready to start working today? [y/n] ")
     input_validator(consent)
-    no_session = working_body(consent, work_time_unit, short_break_time, long_break_time)
+    if consent:
+        no_session = working_body(work_time_unit, short_break_time, long_break_time)
+        print("Today you worked " + str(no_session) + " units of time. Congrats!")
     print("Bye, " + name)
-    print("Today you worked "+str(no_session)+" units of time. Congrats!")
+
 
 
 if __name__ == "__main__":
