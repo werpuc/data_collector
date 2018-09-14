@@ -3,12 +3,11 @@ Main file
 """
 
 from datetime import datetime
-from threading import Thread
 import get_preferences 
 import time
 import winsound
 import os
-
+import importlib
 
 def show_options():
 
@@ -25,27 +24,49 @@ def show_options():
 
 def get_nice_datetime():
 
-    """ Returns date in my fauvorite format """
+    """ Returns current datetime in my favourite format """
 
     return datetime.now().strftime('%Y-%m-%d %H:%M')
 
 
 def yn_input_validator(prompt):
 
-    """ Check if answer is as requested """
+    """ Check if answer is an integer as requested """
 
     while True:
         answer = input(prompt).lower()
         if answer in ('n', 'no'):
-            answer = False
-            break
+            return False
         elif answer in ('y', 'yes'):
-            answer = True
-            break
+            return True
         else:
             print('I don\'t understand. Can you answer as requested? [y/n] ')
 
-    return answer
+
+def int_input_validator(prompt):
+
+    """ Checks if input is in correct type """ 
+
+    while True:
+        answer = input(prompt)
+        try:
+            answer = int(answer)
+            return answer
+        except ValueError:
+            print('Please, give me an integer!')
+
+
+def date_input_validator(prompt):
+
+    """ Check if answer is a date as requested """
+
+    while True:
+        answer = input(prompt)
+        try:
+            answer = datetime.strptime(answer, '%Y-%m-%d').date()
+            return answer
+        except ValueError:
+            print('Please, give me a date! ')
 
 
 def gather_general_data():
@@ -58,9 +79,10 @@ def manage_preferences():
 
     is_new_user = yn_input_validator('Are you a new user? ')
 
-    if is_new_user:
-        pass
-    else:
+    def show_current_preferences():
+
+        """ Show current preferences """
+
         print('Your current preferences:')
         print('User name: ' + get_preferences.get_user_name())
         print('Work time unit: ' + str(get_preferences.get_work_time_unit()))
@@ -69,12 +91,41 @@ def manage_preferences():
         print('Work unit bundle: ' + str(get_preferences.get_work_unit_bundle()))
 
 
-def write_to_file(directory, file_name, *params):
+    if is_new_user:
+        print('Hello! I\'ll ask you some questions')
+        name = input('What is your name? ')
+        work_time_unit = int_input_validator("How long would you like your work time unit to last (suggested: 25 min) ? ")
+        short_break_time = int_input_validator("How long would you like your break time unit to last (suggested: 5 min) ? ")
+        long_break_time = int_input_validator("How long would you like your long break time unit to last (suggested: 15 min) ? ")
+        work_unit_bundle = int_input_validator("After what amount of working unit would you like your long break (suggested: 4) ? ")
+
+        try:
+            with open('my_preferences.py', 'w') as f:
+                f.write('name = \'' + name + '\'\n')
+                f.write('work_time_unit = ' + str(work_time_unit) + '\n')
+                f.write('short_break_time = ' + str(short_break_time) + '\n')
+                f.write('long_break_time = ' + str(long_break_time)+ '\n')
+                f.write('work_unit_bundle = ' + str(work_unit_bundle) + '\n')
+            importlib.reload(get_preferences)
+            show_current_preferences()
+        except IOError:
+            print('Data file manipulation failed!')
+            print(sys.exc_info()[0])
+    else:
+        show_current_preferences()
+        is_change = yn_input_validator('Do you want to change something? [y/n] ')
+        if is_change:
+            pass
+
+    show_current_preferences()
+        
+
+def write_to_csv_file(directory, file_name, *params):
 
     """ Avoiding repetition """  
 
     file_address = directory + '/' + file_name
-    text = ','.join(map(str, params)) 
+    text = ','.join(str(x) for x in params)
 
     try:
         with open(file_address, "a+") as f:
@@ -92,19 +143,14 @@ def add_work_data_manually(directory, file_name):
     is_today = yn_input_validator('Do you want to insert data only from today? [y/n] ')
 
     if is_today:
-        while True:
-            try:
-                no_session = int(input('How many pomodoros have you worked today? '))
-                day = datetime.now().date()
-                write_to_file(directory, file_name, day, no_session)
-                break
-            except ValueError:
-                print('Please answer in numbers!')
+        no_session = int_input_validator('How many pomodoros have you worked today? ')
+        day = datetime.now().date()
+        write_to_csv_file(directory, file_name, day, no_session)
     else:
         while True: 
-            day = input('When you worked? ')
-            no_session = input('How mych pomodoros? ')
-            write_to_file(directory, file_name, day, no_session)
+            day = date_input_validator('When you worked? ')
+            no_session = int_input_validator('How much pomodoros? ')
+            write_to_csv_file(directory, file_name, day, no_session)
             is_end = yn_input_validator('Is this the end? [y/n] ')
             if is_end: break
 
@@ -146,7 +192,7 @@ def working_body(directory, work_time_unit, short_break_time, long_break_time, w
         work_start_at = get_nice_datetime()
         unit_type = 'work time unit'
         countdown(work_time_unit, 'Work time unit')
-        write_to_file(directory, file_name, work_start_at, unit_type)
+        write_to_csv_file(directory, file_name, work_start_at, unit_type)
 
         if_break = yn_input_validator('Do you want to have a break? [y/n] ')
 
@@ -156,7 +202,7 @@ def working_body(directory, work_time_unit, short_break_time, long_break_time, w
             unit_type = 'long break' if break_time > 20 else 'short break'
             print('Starting ' + unit_type)
             countdown(break_time, 'Break')
-            write_to_file(directory, file_name, break_start_at, unit_type)
+            write_to_csv_file(directory, file_name, break_start_at, unit_type)
 
         print('Congratulations for finishing work unit! ')
         consent = yn_input_validator('Do you want to work more? [y/n] ')
@@ -191,8 +237,7 @@ def main():
             long_break_time = get_preferences.get_long_break_time()
             work_unit_bundle = get_preferences.get_work_unit_bundle()
             no_session = working_body(directory, work_time_unit, short_break_time, long_break_time, work_unit_bundle)
-            write_to_file(directory, file_name, day, no_session)
-
+            write_to_csv_file(directory, file_name, day, no_session)
         elif action in ('d', 'D'):
             add_work_data_manually(directory, file_name)
         else:
