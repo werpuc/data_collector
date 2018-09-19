@@ -115,7 +115,7 @@ def manage_preferences():
         show_current_preferences()
         is_change = yn_input_validator('Do you want to change something? [y/n] ')
         if is_change:
-            pass
+            print('Please, pretend you are a new user and just override all data. For now, promise!')
 
     show_current_preferences()
         
@@ -222,7 +222,10 @@ def main():
     file_name = 'work_data.csv'
 
     if not os.path.exists(directory):
-        os.makedirs(directory)
+        try:
+            os.makedirs(directory)
+        except:
+            pass
    
     while action != 'q':
         
