@@ -4,20 +4,26 @@ from data_collector import *
 
 
 @contextmanager
-def mockInput(mock):
+def mock_input(mock):
+
+	""" prepare input data """
+	
     original_input = __builtins__.input
     __builtins__.input = lambda _: mock
     yield
     __builtins__.input = original_input
 
 
-class TestAnswerReturn(unittest.TestCase):
-    def testYes(self):
-        with mockInput('yes'):
+class test_yn_input_validator(unittest.TestCase):
+
+	""" Tests for yn_input_validator """
+
+    def test_yes(self):
+        with mock_input('yes'):
             self.assertEqual(yn_input_validator(''), True)
 
-    def testNo(self):
-        with mockInput('no'):
+    def test_no(self):
+        with mock_input('no'):
             self.assertEqual(yn_input_validator(''), False)
 
 
