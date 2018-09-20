@@ -69,15 +69,48 @@ def date_input_validator(prompt):
             print('Please, give me a date! ')
 
 
+def time_input_validator(prompt):
+
+    """ Check if answer is a time as requested """
+
+    while True:
+        answer = input(prompt)
+        try:
+            time.strptime(answer, '%H:%M')
+            return answer
+        except ValueError:
+            print('Please, give me time! ')
+
+
 def gather_general_data():
-    pass
+    
+    """ Gather additional data """
+
+    is_today = yn_input_validator('Are you adding data from today? [y/n] ')
+    directory = 'collected_data'
+    file_name = 'general_data.csv'
+
+    while True:
+        if is_today:
+            day = datetime.now().date()
+        else:
+            day = date_input_validator('When was this data generated? [YYYY-MM-DD] ')
+
+        actual_get_out_of_bed_time = time_input_validator("What time did you actually get out of bed? [HH:MM] ")
+        good_sleep = yn_input_validator("Have you slept well? [y/n] ")
+        morning_routine = yn_input_validator("Have you done you morning workout routine? [y/n] ")
+
+        write_to_csv_file(directory, file_name, day, actual_get_out_of_bed_time, good_sleep, morning_routine)
+        is_end = yn_input_validator('Is this all of the data you wanted to include? [y/n] ')
+        if is_end: break
+        is_today = False
 
 
 def manage_preferences():
 
     """ View, create or update your preferences """
 
-    is_new_user = yn_input_validator('Are you a new user? ')
+    is_new_user = yn_input_validator('Are you a new user? [yn] ')
 
     def show_current_preferences():
 
@@ -143,13 +176,13 @@ def add_work_data_manually(directory, file_name):
     is_today = yn_input_validator('Do you want to insert data only from today? [y/n] ')
 
     if is_today:
-        no_session = int_input_validator('How many pomodoros have you worked today? ')
+        no_session = int_input_validator('How many pomodoros have you worked today? [int] ')
         day = datetime.now().date()
         write_to_csv_file(directory, file_name, day, no_session)
     else:
         while True: 
-            day = date_input_validator('When you worked? ')
-            no_session = int_input_validator('How much pomodoros? ')
+            day = date_input_validator('When you worked? [YYYY-MM-DD] ')
+            no_session = int_input_validator('How much pomodoros? [int] ')
             write_to_csv_file(directory, file_name, day, no_session)
             is_end = yn_input_validator('Is this the end? [y/n] ')
             if is_end: break
