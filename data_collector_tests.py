@@ -48,23 +48,30 @@ class TestGetNiceDatetime(unittest.TestCase):
 
 class TestIntInputValidator(unittest.TestCase):
 
-	""" Tests int_input_validator """
+	""" Tests for int_input_vaidator """
 
-	pass
+	def test_1(self):
+		with mock_input(1):
+			self.assertEqual(int_input_validator(''), True)
+
 
 
 class TestDateInputValidator(unittest.TestCase):
 
 	""" Tests for date_input_validator """ 
 
-	pass
+	def test_new_year(self):
+		with mock_input('2018-01-01'):
+			self.assertEqual(date_input_validator(''), datetime.strptime('2018-01-01', '%Y-%m-%d').date())
 
 
 class TestTimeInputValidator(unittest.TestCase):
 
 	""" Tests for time_input_validator """
 
-	pass
+	def test_2137(self):
+		with mock_input('21:37'):
+			self.assertEqual(time_input_validator(''), '21:37')
 
 
 class TestGatherGeneralData(unittest.TestCase):
